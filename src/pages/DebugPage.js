@@ -1,6 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { sendTestNotification, requestNotificationPermission } from '../registerServiceWorker';
-import { ErrorIcon, WarningIcon, InfoIcon, CheckIcon, CloseIcon } from '../icons';
+import {
+  sendTestNotification,
+  requestNotificationPermission
+} from '../registerServiceWorker';
+import {
+  ErrorIcon,
+  WarningIcon,
+  InfoIcon,
+  CheckIcon,
+  CloseIcon
+} from '../icons';
 
 const CACHE_NAME = 'reddpwa-cache-v5';
 
@@ -8,11 +17,12 @@ function DebugPage({ showNotification }) {
   const [debugInfo, setDebugInfo] = useState({});
   const [cacheSize, setCacheSize] = useState(0);
   const [serviceWorkerStatus, setServiceWorkerStatus] = useState('unknown');
-  const [notificationPermission, setNotificationPermission] = useState('default');
+  const [notificationPermission, setNotificationPermission] =
+    useState('default');
   const [notificationStatus, setNotificationStatus] = useState('');
   const [errorModal, setErrorModal] = useState(null);
 
-  const formatBytes = useCallback((bytes) => {
+  const formatBytes = useCallback(bytes => {
     if (bytes === 0) {
       return '0 Bytes';
     }
@@ -33,11 +43,13 @@ function DebugPage({ showNotification }) {
       cookieEnabled: navigator.cookieEnabled,
       hardwareConcurrency: navigator.hardwareConcurrency,
       deviceMemory: navigator.deviceMemory,
-      connection: navigator.connection ? {
-        effectiveType: navigator.connection.effectiveType,
-        downlink: navigator.connection.downlink,
-        rtt: navigator.connection.rtt
-      } : null,
+      connection: navigator.connection
+        ? {
+            effectiveType: navigator.connection.effectiveType,
+            downlink: navigator.connection.downlink,
+            rtt: navigator.connection.rtt
+          }
+        : null,
       storage: {
         localStorage: formatBytes(JSON.stringify(localStorage).length),
         sessionStorage: formatBytes(JSON.stringify(sessionStorage).length)
@@ -172,10 +184,18 @@ function DebugPage({ showNotification }) {
 
     if (granted) {
       setNotificationStatus('Разрешение получено');
-      showNotification('Успех', 'Разрешение на уведомления получено', 'success');
+      showNotification(
+        'Успех',
+        'Разрешение на уведомления получено',
+        'success'
+      );
     } else {
       setNotificationStatus('Разрешение отклонено');
-      showNotification('Предупреждение', 'Разрешение на уведомления отклонено', 'warning');
+      showNotification(
+        'Предупреждение',
+        'Разрешение на уведомления отклонено',
+        'warning'
+      );
     }
 
     setTimeout(() => setNotificationStatus(''), 3000);
@@ -183,19 +203,27 @@ function DebugPage({ showNotification }) {
 
   const getServiceWorkerStatusText = () => {
     switch (serviceWorkerStatus) {
-    case 'activated': return 'Активен';
-    case 'error': return 'Ошибка';
-    case 'not_supported': return 'Не поддерживается';
-    default: return 'Загрузка...';
+      case 'activated':
+        return 'Активен';
+      case 'error':
+        return 'Ошибка';
+      case 'not_supported':
+        return 'Не поддерживается';
+      default:
+        return 'Загрузка...';
     }
   };
 
   const getNotificationStatusText = () => {
     switch (notificationPermission) {
-    case 'granted': return 'Разрешено';
-    case 'denied': return 'Заблокировано';
-    case 'default': return 'Не запрошено';
-    default: return 'Неизвестно';
+      case 'granted':
+        return 'Разрешено';
+      case 'denied':
+        return 'Заблокировано';
+      case 'default':
+        return 'Не запрошено';
+      default:
+        return 'Неизвестно';
     }
   };
 
@@ -203,12 +231,16 @@ function DebugPage({ showNotification }) {
     setErrorModal(null);
   };
 
-  const getModalIcon = (type) => {
+  const getModalIcon = type => {
     switch (type) {
-    case 'error': return <ErrorIcon />;
-    case 'warning': return <WarningIcon />;
-    case 'success': return <CheckIcon />;
-    default: return <InfoIcon />;
+      case 'error':
+        return <ErrorIcon />;
+      case 'warning':
+        return <WarningIcon />;
+      case 'success':
+        return <CheckIcon />;
+      default:
+        return <InfoIcon />;
     }
   };
 
@@ -237,10 +269,17 @@ function DebugPage({ showNotification }) {
       </div>
 
       {notificationStatus && (
-        <div className={`notification-status ${
-          notificationStatus.includes('отправлено') || notificationStatus.includes('получено') ? 'success' :
-            notificationStatus.includes('Ошибка') || notificationStatus.includes('отклонено') ? 'error' : 'info'
-        }`}>
+        <div
+          className={`notification-status ${
+            notificationStatus.includes('отправлено') ||
+            notificationStatus.includes('получено')
+              ? 'success'
+              : notificationStatus.includes('Ошибка') ||
+                  notificationStatus.includes('отклонено')
+                ? 'error'
+                : 'info'
+          }`}
+        >
           {notificationStatus}
         </div>
       )}
@@ -263,7 +302,9 @@ function DebugPage({ showNotification }) {
             </div>
             <div className="info-item">
               <span>Онлайн:</span>
-              <span className={debugInfo.online ? 'status-success' : 'status-error'}>
+              <span
+                className={debugInfo.online ? 'status-success' : 'status-error'}
+              >
                 {debugInfo.online ? 'Да' : 'Нет'}
               </span>
             </div>
@@ -311,11 +352,15 @@ function DebugPage({ showNotification }) {
           <div className="info-grid">
             <div className="info-item">
               <span>Экран:</span>
-              <span>{debugInfo.screen?.width}x{debugInfo.screen?.height}</span>
+              <span>
+                {debugInfo.screen?.width}x{debugInfo.screen?.height}
+              </span>
             </div>
             <div className="info-item">
               <span>Вьюпорт:</span>
-              <span>{debugInfo.viewport?.width}x{debugInfo.viewport?.height}</span>
+              <span>
+                {debugInfo.viewport?.width}x{debugInfo.viewport?.height}
+              </span>
             </div>
             <div className="info-item">
               <span>Процессоры:</span>
@@ -331,14 +376,15 @@ function DebugPage({ showNotification }) {
 
       <div className="raw-data">
         <h3>Техническая информация</h3>
-        <pre className="debug-pre">
-          {JSON.stringify(debugInfo, null, 2)}
-        </pre>
+        <pre className="debug-pre">{JSON.stringify(debugInfo, null, 2)}</pre>
       </div>
 
       {errorModal && (
         <div className="modal-overlay" onClick={closeErrorModal}>
-          <div className={`modal error-modal ${errorModal.type}`} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`modal error-modal ${errorModal.type}`}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div className="modal-title">
                 {getModalIcon(errorModal.type)}

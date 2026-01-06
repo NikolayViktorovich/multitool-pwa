@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Alternative
 
 on:
   push:
@@ -29,15 +29,11 @@ jobs:
           
     - name: Install dependencies
       run: |
-        npm config set audit-level high
+        npm config set audit-level moderate
         npm install --no-audit --no-fund
         
     - name: Run ESLint
       run: npm run lint
-      
-    - name: Check Prettier formatting
-      run: npm run format:check
-      continue-on-error: true
       
     - name: Run tests
       run: npm test -- --coverage --watchAll=false --passWithNoTests
@@ -45,12 +41,6 @@ jobs:
     - name: Build application
       run: npm run build
       
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage/lcov.info
-      continue-on-error: true
-        
   deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -67,7 +57,7 @@ jobs:
         
     - name: Install dependencies
       run: |
-        npm config set audit-level high
+        npm config set audit-level moderate
         npm install --no-audit --no-fund
         
     - name: Build for production

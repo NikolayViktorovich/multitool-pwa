@@ -20,7 +20,8 @@
   background: var(--obsidian-bg);
   min-height: 100vh;
   height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
   overflow-x: hidden;
   color: var(--obsidian-text);
   display: flex;
@@ -932,8 +933,12 @@ h3 {
 
 /* Анимации */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -967,39 +972,39 @@ h3 {
   .main-nav {
     width: 200px;
   }
-  
+
   .page-content {
     margin-left: 200px;
     width: calc(100% - 200px);
     padding: 24px 20px;
   }
-  
+
   .nav-brand h1 {
     font-size: 18px;
   }
-  
+
   .files-container {
     grid-template-columns: 1fr;
   }
-  
+
   .files-list {
     grid-column: 1;
   }
-  
+
   .debug-sections {
     grid-template-columns: 1fr;
   }
-  
+
   .features-horizontal {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     padding: 20px;
     gap: 16px;
   }
-  
+
   h1 {
     font-size: 28px;
   }
-  
+
   h2 {
     font-size: 22px;
   }
@@ -1012,55 +1017,55 @@ h3 {
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 150;
   }
-  
+
   .main-nav.open {
     left: 0;
   }
-  
+
   .nav-close {
     display: flex !important;
   }
-  
+
   .menu-toggle.hidden {
     display: none !important;
   }
-  
+
   .page-content {
     margin-left: 0;
     width: 100%;
     padding: 80px 20px 24px;
   }
-  
+
   .features-horizontal {
     grid-template-columns: 1fr;
     padding: 16px;
     gap: 12px;
   }
-  
+
   .feature-item {
     min-height: 100px;
     padding: 20px;
     flex-direction: row;
   }
-  
+
   .feature-icon {
     width: 48px;
     height: 48px;
   }
-  
+
   .feature-icon svg {
     width: 28px;
     height: 28px;
   }
-  
+
   .weather-details {
     grid-template-columns: 1fr;
   }
-  
+
   .storage-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }

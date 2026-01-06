@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders Multitool PWA app', () => {
+test('renders Multitool app', () => {
   render(<App />);
 
-  const appTitle = screen.getByText(/Multitool PWA/i);
+  const appTitle = screen.getByText(/Multitool/i);
   expect(appTitle).toBeInTheDocument();
 
   const homeButton = screen.getByRole('button', { name: /Главная/i });

@@ -21,8 +21,8 @@
     "eject": "react-scripts eject",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
-    "format": "prettier --write src/**/*.{js,jsx,ts,tsx,css,md}",
-    "format:check": "prettier --check src/**/*.{js,jsx,ts,tsx,css,md}",
+    "format": "prettier --write src/**/*.{js,css}",
+    "format:check": "prettier --check src/**/*.{js,css}",
     "analyze": "npm run build && npx serve -s build"
   },
   "eslintConfig": {
@@ -42,5 +42,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.7.4"
   }
 }

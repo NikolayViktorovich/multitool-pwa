@@ -6,7 +6,7 @@ function WeatherPage() {
   const [city, setCity] = useState('Москва');
   const [error, setError] = useState('');
 
-  const getWeatherDescription = useCallback((code) => {
+  const getWeatherDescription = useCallback(code => {
     const codes = {
       0: 'Ясно',
       1: 'Преимущественно ясно',
@@ -26,52 +26,54 @@ function WeatherPage() {
     return codes[code] || 'Неизвестно';
   }, []);
 
-  const fetchOpenMeteoWeather = useCallback(async (cityName) => {
-    try {
-      const geoResponse = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=ru`
-      );
+  const fetchOpenMeteoWeather = useCallback(
+    async cityName => {
+      try {
+        const geoResponse = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=ru`
+        );
 
-      if (!geoResponse.ok) {
-        throw new Error('Город не найден');
+        if (!geoResponse.ok) {
+          throw new Error('Город не найден');
+        }
+
+        const geoData = await geoResponse.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          throw new Error('Город не найден');
+        }
+
+        const location = geoData.results[0];
+
+        const weatherResponse = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,weather_code&timezone=auto`
+        );
+
+        if (!weatherResponse.ok) {
+          throw new Error('Ошибка получения погоды');
+        }
+
+        const weatherData = await weatherResponse.json();
+        const current = weatherData.current;
+
+        return {
+          temperature: Math.round(current.temperature_2m),
+          feelsLike: Math.round(current.apparent_temperature),
+          description: getWeatherDescription(current.weather_code),
+          humidity: current.relative_humidity_2m,
+          wind: Math.round(current.wind_speed_10m),
+          pressure: Math.round(current.pressure_msl),
+          city: location.name,
+          country: location.country_code,
+          timestamp: Date.now()
+        };
+      } catch (error) {
+        throw error;
       }
+    },
+    [getWeatherDescription]
+  );
 
-      const geoData = await geoResponse.json();
-      if (!geoData.results || geoData.results.length === 0) {
-        throw new Error('Город не найден');
-      }
-
-      const location = geoData.results[0];
-
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,weather_code&timezone=auto`
-      );
-
-      if (!weatherResponse.ok) {
-        throw new Error('Ошибка получения погоды');
-      }
-
-      const weatherData = await weatherResponse.json();
-      const current = weatherData.current;
-
-      return {
-        temperature: Math.round(current.temperature_2m),
-        feelsLike: Math.round(current.apparent_temperature),
-        description: getWeatherDescription(current.weather_code),
-        humidity: current.relative_humidity_2m,
-        wind: Math.round(current.wind_speed_10m),
-        pressure: Math.round(current.pressure_msl),
-        city: location.name,
-        country: location.country_code,
-        timestamp: Date.now()
-      };
-
-    } catch (error) {
-      throw error;
-    }
-  }, [getWeatherDescription]);
-
-  const fetchWeatherAPI = useCallback(async (cityName) => {
+  const fetchWeatherAPI = useCallback(async cityName => {
     try {
       const response = await fetch(
         `https://api.weatherapi.com/v1/current.json?key=7c8c66e9f1a44c1b857145058242101&q=${encodeURIComponent(cityName)}&lang=ru`
@@ -99,37 +101,39 @@ function WeatherPage() {
     }
   }, []);
 
-  const fetchWeather = useCallback(async (cityName) => {
-    if (!cityName || !cityName.trim()) {
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      let weatherData;
-
-      try {
-        weatherData = await fetchOpenMeteoWeather(cityName);
-      } catch (error) {
-        weatherData = await fetchWeatherAPI(cityName);
+  const fetchWeather = useCallback(
+    async cityName => {
+      if (!cityName || !cityName.trim()) {
+        return;
       }
 
-      setWeather(weatherData);
+      setLoading(true);
+      setError('');
 
-    } catch (error) {
-      setError('Не удалось получить данные. Проверьте название города.');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchOpenMeteoWeather, fetchWeatherAPI]);
+      try {
+        let weatherData;
+
+        try {
+          weatherData = await fetchOpenMeteoWeather(cityName);
+        } catch (error) {
+          weatherData = await fetchWeatherAPI(cityName);
+        }
+
+        setWeather(weatherData);
+      } catch (error) {
+        setError('Не удалось получить данные. Проверьте название города.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchOpenMeteoWeather, fetchWeatherAPI]
+  );
 
   useEffect(() => {
     fetchWeather('Москва');
   }, [fetchWeather]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     if (city.trim()) {
       fetchWeather(city.trim());
@@ -144,7 +148,7 @@ function WeatherPage() {
         <input
           type="text"
           value={city}
-          onChange={(e) => setCity(e.target.value)}
+          onChange={e => setCity(e.target.value)}
           placeholder="Введите город"
           className="weather-input"
           disabled={loading}
@@ -154,18 +158,16 @@ function WeatherPage() {
         </button>
       </form>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {loading ? (
         <div className="loading">Загрузка...</div>
       ) : weather ? (
         <div className="weather-card">
           <div className="weather-header">
-            <h3>{weather.city}, {weather.country}</h3>
+            <h3>
+              {weather.city}, {weather.country}
+            </h3>
           </div>
 
           <div className="weather-main">

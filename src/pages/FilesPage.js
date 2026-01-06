@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { ImageIcon, TextIcon, PdfIcon, DefaultFileIcon, DownloadIcon, DeleteIcon, ErrorIcon, CloseIcon } from '../icons';
+import {
+  ImageIcon,
+  TextIcon,
+  PdfIcon,
+  DefaultFileIcon,
+  DownloadIcon,
+  DeleteIcon,
+  ErrorIcon,
+  CloseIcon
+} from '../icons';
 
 function FilesPage() {
   const [files, setFiles] = useState([]);
@@ -13,14 +22,15 @@ function FilesPage() {
     }
   }, []);
 
-  const saveToStorage = (filesToSave) => {
+  const saveToStorage = filesToSave => {
     try {
       const jsonData = JSON.stringify(filesToSave);
       if (jsonData.length > 4 * 1024 * 1024) {
         setErrorModal({
           type: 'error',
           title: 'Ошибка размера',
-          message: 'Файл слишком большой для сохранения. Максимальный размер: 4MB'
+          message:
+            'Файл слишком большой для сохранения. Максимальный размер: 4MB'
         });
         return false;
       }
@@ -31,7 +41,8 @@ function FilesPage() {
         setErrorModal({
           type: 'warning',
           title: 'Недостаточно места',
-          message: 'Недостаточно места в хранилище. Пожалуйста, удалите некоторые файлы.'
+          message:
+            'Недостаточно места в хранилище. Пожалуйста, удалите некоторые файлы.'
         });
         if (filesToSave.length > 0) {
           const reducedFiles = filesToSave.slice(-5);
@@ -47,7 +58,8 @@ function FilesPage() {
             setErrorModal({
               type: 'error',
               title: 'Критическая ошибка',
-              message: 'Критическая ошибка хранилища. Пожалуйста, очистите данные вручную.'
+              message:
+                'Критическая ошибка хранилища. Пожалуйста, очистите данные вручную.'
             });
           }
         }
@@ -58,7 +70,7 @@ function FilesPage() {
     }
   };
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = event => {
     const file = event.target.files[0];
     if (!file) {
       return;
@@ -80,7 +92,7 @@ function FilesPage() {
           clearInterval(interval);
 
           const reader = new FileReader();
-          reader.onload = (e) => {
+          reader.onload = e => {
             const newFile = {
               id: Date.now(),
               name: file.name,
@@ -104,21 +116,21 @@ function FilesPage() {
     }, 100);
   };
 
-  const downloadFile = (file) => {
+  const downloadFile = file => {
     const link = document.createElement('a');
     link.href = file.content;
     link.download = file.name;
     link.click();
   };
 
-  const deleteFile = (fileId) => {
+  const deleteFile = fileId => {
     const updatedFiles = files.filter(file => file.id !== fileId);
     if (saveToStorage(updatedFiles)) {
       setFiles(updatedFiles);
     }
   };
 
-  const getFileIcon = (type) => {
+  const getFileIcon = type => {
     if (type.startsWith('image/')) {
       return <ImageIcon />;
     }
@@ -131,7 +143,7 @@ function FilesPage() {
     return <DefaultFileIcon />;
   };
 
-  const formatFileSize = (bytes) => {
+  const formatFileSize = bytes => {
     if (bytes === 0) {
       return '0 Bytes';
     }
@@ -187,7 +199,8 @@ function FilesPage() {
                   <div className="file-info">
                     <div className="file-name">{file.name}</div>
                     <div className="file-meta">
-                      {formatFileSize(file.size)} • {new Date(file.uploadedAt).toLocaleDateString()}
+                      {formatFileSize(file.size)} •{' '}
+                      {new Date(file.uploadedAt).toLocaleDateString()}
                     </div>
                   </div>
                   <div className="file-actions">
@@ -221,7 +234,11 @@ function FilesPage() {
             </div>
             <div className="stat">
               <span>Общий размер:</span>
-              <span>{formatFileSize(files.reduce((sum, file) => sum + file.size, 0))}</span>
+              <span>
+                {formatFileSize(
+                  files.reduce((sum, file) => sum + file.size, 0)
+                )}
+              </span>
             </div>
           </div>
         </div>
@@ -230,7 +247,10 @@ function FilesPage() {
       {/* Модальное окно ошибки */}
       {errorModal && (
         <div className="modal-overlay" onClick={closeErrorModal}>
-          <div className={`modal error-modal ${errorModal.type}`} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`modal error-modal ${errorModal.type}`}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div className="modal-title">
                 <ErrorIcon />

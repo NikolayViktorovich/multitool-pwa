@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { WeatherFeatureIcon, FilesFeatureIcon, DebugFeatureIcon, OnlineIcon, OfflineIcon } from '../icons';
+import {
+  WeatherFeatureIcon,
+  FilesFeatureIcon,
+  DebugFeatureIcon,
+  OnlineIcon,
+  OfflineIcon
+} from '../icons';
 
 function HomePage({ onNavigate }) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -26,9 +32,18 @@ function HomePage({ onNavigate }) {
   return (
     <div className="home-page">
       <div className="status-info">
-        <p>Статус сети:
+        <p>
+          Статус сети:
           <span className={isOnline ? 'online' : 'offline'}>
-            {isOnline ? <><OnlineIcon /> Онлайн</> : <><OfflineIcon /> Офлайн</>}
+            {isOnline ? (
+              <>
+                <OnlineIcon /> Онлайн
+              </>
+            ) : (
+              <>
+                <OfflineIcon /> Офлайн
+              </>
+            )}
           </span>
         </p>
       </div>
@@ -39,7 +54,10 @@ function HomePage({ onNavigate }) {
         </div>
 
         <div className="features-horizontal">
-          <div className="feature-item" onClick={() => handleFeatureClick('Погода', 'weather')}>
+          <div
+            className="feature-item"
+            onClick={() => handleFeatureClick('Погода', 'weather')}
+          >
             <div className="feature-icon">
               <WeatherFeatureIcon />
             </div>
@@ -49,7 +67,10 @@ function HomePage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="feature-item" onClick={() => handleFeatureClick('Файлы', 'files')}>
+          <div
+            className="feature-item"
+            onClick={() => handleFeatureClick('Файлы', 'files')}
+          >
             <div className="feature-icon">
               <FilesFeatureIcon />
             </div>
@@ -59,7 +80,10 @@ function HomePage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="feature-item" onClick={() => handleFeatureClick('Debug', 'debug')}>
+          <div
+            className="feature-item"
+            onClick={() => handleFeatureClick('Debug', 'debug')}
+          >
             <div className="feature-icon">
               <DebugFeatureIcon />
             </div>
