@@ -1,13 +1,14 @@
 export const registerServiceWorker = () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(registration => {
         // eslint-disable-next-line no-console
         // eslint-disable-next-line no-console
         console.log('Service Worker успешно зарегистрирован: ', registration);
         return registration;
       })
-      .catch((registrationError) => {
+      .catch(registrationError => {
         // eslint-disable-next-line no-console
         // eslint-disable-next-line no-console
         console.log('Ошибка регистрации Service Worker: ', registrationError);
@@ -57,7 +58,10 @@ export const requestNotificationPermission = async () => {
   }
 };
 
-export const sendTestNotification = async (title = 'Тестовое уведомление', options = {}) => {
+export const sendTestNotification = async (
+  title = 'Тестовое уведомление',
+  options = {}
+) => {
   if (Notification.permission !== 'granted') {
     const granted = await requestNotificationPermission();
     if (!granted) {
@@ -78,7 +82,10 @@ export const sendTestNotification = async (title = 'Тестовое уведо�
           badge: options.badge || '/logo192.png',
           image: options.image,
           tag: options.tag || 'test-notification',
-          requireInteraction: options.requireInteraction !== undefined ? options.requireInteraction : true,
+          requireInteraction:
+            options.requireInteraction !== undefined
+              ? options.requireInteraction
+              : true,
           actions: options.actions || [],
           data: options.data || {
             url: window.location.origin,
@@ -93,7 +100,10 @@ export const sendTestNotification = async (title = 'Тестовое уведо�
         return true;
       } catch (swError) {
         // eslint-disable-next-line no-console
-        console.log('Ошибка через Service Worker, используем обычный API:', swError);
+        console.log(
+          'Ошибка через Service Worker, используем обычный API:',
+          swError
+        );
       }
     }
 
@@ -103,7 +113,10 @@ export const sendTestNotification = async (title = 'Тестовое уведо�
         icon: options.icon || '/logo192.png',
         badge: options.badge || '/logo192.png',
         tag: options.tag || 'test-notification',
-        requireInteraction: options.requireInteraction !== undefined ? options.requireInteraction : true,
+        requireInteraction:
+          options.requireInteraction !== undefined
+            ? options.requireInteraction
+            : true,
         ...options
       });
 
@@ -133,7 +146,8 @@ export const subscribeToPush = async () => {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    const vapidPublicKey = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
+    const vapidPublicKey =
+      'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
@@ -149,10 +163,8 @@ export const subscribeToPush = async () => {
 };
 
 function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);

@@ -68,16 +68,16 @@ function App() {
 
   const renderPage = useCallback(() => {
     switch (currentPage) {
-    case 'home':
-      return <HomePage onNavigate={setCurrentPage} />;
-    case 'weather':
-      return <WeatherPage />;
-    case 'files':
-      return <FilesPage />;
-    case 'debug':
-      return <DebugPage showNotification={showNotification} />;
-    default:
-      return <HomePage onNavigate={setCurrentPage} />;
+      case 'home':
+        return <HomePage onNavigate={setCurrentPage} />;
+      case 'weather':
+        return <WeatherPage />;
+      case 'files':
+        return <FilesPage />;
+      case 'debug':
+        return <DebugPage showNotification={showNotification} />;
+      default:
+        return <HomePage onNavigate={setCurrentPage} />;
     }
   }, [currentPage, showNotification]);
 
@@ -125,7 +125,10 @@ function App() {
           className="modal-overlay"
           onClick={() => setShowInstallPrompt(false)}
         >
-          <div className="modal install-modal" onClick={e => e.stopPropagation()}>
+          <div
+            className="modal install-modal"
+            onClick={e => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h3>Установить приложение</h3>
               <button
@@ -224,7 +227,10 @@ function App() {
           >
             <div className="notification-header">
               <h3>{notification.title}</h3>
-              <button className="notification-close" onClick={closeNotification}>
+              <button
+                className="notification-close"
+                onClick={closeNotification}
+              >
                 <CloseIcon />
               </button>
             </div>
