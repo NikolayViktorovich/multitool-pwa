@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -37,7 +37,6 @@ jobs:
       
     - name: Check Prettier formatting
       run: npm run format:check
-      continue-on-error: true
       
     - name: Run tests
       run: npm test -- --coverage --watchAll=false --passWithNoTests
@@ -50,31 +49,3 @@ jobs:
       with:
         file: ./coverage/lcov.info
       continue-on-error: true
-        
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        
-    - name: Install dependencies
-      run: |
-        npm config set audit-level high
-        npm install --no-audit --no-fund
-        
-    - name: Build for production
-      run: npm run build
-      
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
