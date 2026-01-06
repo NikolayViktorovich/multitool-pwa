@@ -1,33 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { registerServiceWorker } from './registerServiceWorker';
 import './App.css';
 import HomePage from './pages/HomePage';
-import GamesPage from './pages/GamesPage';
 import WeatherPage from './pages/WeatherPage';
 import FilesPage from './pages/FilesPage';
 import DebugPage from './pages/DebugPage';
+import {
+  HomeIcon,
+  WeatherIcon,
+  FilesIcon,
+  DebugIcon,
+  MenuIcon,
+  CloseIcon,
+  BackIcon
+} from './icons';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [theme] = useState('dark');
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [navigationHistory, setNavigationHistory] = useState(['home']);
+  const [notification, setNotification] = useState(null);
 
-  useEffect(() => {
-    registerServiceWorker();
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallPrompt(true);
-    });
-
-    window.addEventListener('appinstalled', () => {
-      setShowInstallPrompt(false);
-    });
+  const showNotification = useCallback((title, message, type = 'info') => {
+    setNotification({ title, message, type });
+    setTimeout(() => setNotification(null), 4000);
   }, []);
 
-  const handleInstallClick = async () => {
+  const closeNotification = useCallback(() => {
+    setNotification(null);
+  }, []);
+
+  const handleInstallClick = useCallback(async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
@@ -35,90 +41,199 @@ function App() {
         setShowInstallPrompt(false);
       }
     }
-  };
+  }, [deferredPrompt]);
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage onNavigate={setCurrentPage} />;
-      case 'games':
-        return <GamesPage />;
-      case 'weather':
-        return <WeatherPage />;
-      case 'files':
-        return <FilesPage />;
-      case 'debug':
-        return <DebugPage />;
-      default:
-        return <HomePage onNavigate={setCurrentPage} />;
+  const handleNavigation = useCallback(
+    page => {
+      if (page !== currentPage) {
+        setNavigationHistory(prev => [...prev, page]);
+        setCurrentPage(page);
+      }
+      setMenuOpen(false);
+    },
+    [currentPage]
+  );
+
+  const handleBack = useCallback(() => {
+    if (navigationHistory.length > 1) {
+      const newHistory = [...navigationHistory];
+      newHistory.pop();
+      const previousPage = newHistory[newHistory.length - 1];
+      setNavigationHistory(newHistory);
+      setCurrentPage(previousPage);
     }
-  };
+  }, [navigationHistory]);
+
+  const canGoBack = navigationHistory.length > 1;
+
+  const renderPage = useCallback(() => {
+    switch (currentPage) {
+    case 'home':
+      return <HomePage onNavigate={setCurrentPage} />;
+    case 'weather':
+      return <WeatherPage />;
+    case 'files':
+      return <FilesPage />;
+    case 'debug':
+      return <DebugPage showNotification={showNotification} />;
+    default:
+      return <HomePage onNavigate={setCurrentPage} />;
+    }
+  }, [currentPage, showNotification]);
+
+  useEffect(() => {
+    registerServiceWorker();
+
+    const handleBeforeInstallPrompt = e => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+
+    const handleAppInstalled = () => {
+      setShowInstallPrompt(false);
+    };
+
+    const handleClickOutside = event => {
+      if (
+        menuOpen &&
+        !event.target.closest('.main-nav') &&
+        !event.target.closest('.menu-toggle')
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      );
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
 
   return (
     <div className={`App ${theme}`}>
       {showInstallPrompt && (
-        <div className="install-banner">
-          <div className="install-content">
-            <span>Установите REDDPWA для лучшего опыта</span>
-            <div className="install-buttons">
-              <button className="btn btn-primary" onClick={handleInstallClick}>
-                Установить
+        <div
+          className="modal-overlay"
+          onClick={() => setShowInstallPrompt(false)}
+        >
+          <div className="modal install-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Установить приложение</h3>
+              <button
+                className="modal-close"
+                onClick={() => setShowInstallPrompt(false)}
+              >
+                <CloseIcon />
               </button>
-              <button 
-                className="btn btn-secondary" 
+            </div>
+            <div className="modal-body">
+              <p>
+                Установите Multitool PWA для лучшего опыта использования.
+                Приложение будет работать быстрее и доступно без интернета.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
                 onClick={() => setShowInstallPrompt(false)}
               >
                 Позже
+              </button>
+              <button className="btn btn-primary" onClick={handleInstallClick}>
+                Установить
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <header className="App-header">
-        <nav className="main-nav">
+      <button
+        className={`menu-toggle ${menuOpen ? 'hidden' : ''}`}
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label="Открыть меню"
+      >
+        <MenuIcon />
+      </button>
+
+      <div className={`main-nav ${menuOpen ? 'open' : ''}`}>
+        <div className="nav-header">
           <div className="nav-brand">
-            <h1 className="glitch-title">REDDPWA</h1>
+            <h1>Multitool</h1>
           </div>
-        </nav>
+          <button className="nav-close" onClick={() => setMenuOpen(false)}>
+            <CloseIcon />
+          </button>
+        </div>
 
         <nav className="page-nav">
-          <button 
+          <button
             className={`nav-btn ${currentPage === 'home' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('home')}
+            onClick={() => handleNavigation('home')}
           >
-            Главная
+            <HomeIcon />
+            <span>Главная</span>
           </button>
-          <button 
-            className={`nav-btn ${currentPage === 'games' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('games')}
-          >
-            Игры
-          </button>
-          <button 
+          <button
             className={`nav-btn ${currentPage === 'weather' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('weather')}
+            onClick={() => handleNavigation('weather')}
           >
-            Погода
+            <WeatherIcon />
+            <span>Погода</span>
           </button>
-          <button 
+          <button
             className={`nav-btn ${currentPage === 'files' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('files')}
+            onClick={() => handleNavigation('files')}
           >
-            Файлы
+            <FilesIcon />
+            <span>Файлы</span>
           </button>
-          <button 
+          <button
             className={`nav-btn ${currentPage === 'debug' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('debug')}
+            onClick={() => handleNavigation('debug')}
           >
-            Debug
+            <DebugIcon />
+            <span>Debug</span>
           </button>
         </nav>
+      </div>
 
-        <div className="page-content">
-          {renderPage()}
+      <div className="page-content">
+        {canGoBack && (
+          <button className="btn btn-secondary back-btn" onClick={handleBack}>
+            <BackIcon />
+            Назад
+          </button>
+        )}
+        {renderPage()}
+      </div>
+
+      {notification && (
+        <div className="notification-overlay" onClick={closeNotification}>
+          <div
+            className={`notification ${notification.type}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="notification-header">
+              <h3>{notification.title}</h3>
+              <button className="notification-close" onClick={closeNotification}>
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="notification-body">
+              <p>{notification.message}</p>
+            </div>
+          </div>
         </div>
-      </header>
+      )}
     </div>
   );
 }

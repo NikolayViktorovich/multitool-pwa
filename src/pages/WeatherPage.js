@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function WeatherPage() {
   const [weather, setWeather] = useState(null);
@@ -9,13 +9,13 @@ function WeatherPage() {
   const getWeatherDescription = useCallback((code) => {
     const codes = {
       0: 'Ясно',
-      1: 'Преимущественно ясно', 
+      1: 'Преимущественно ясно',
       2: 'Переменная облачность',
       3: 'Пасмурно',
       45: 'Туман',
       48: 'Туман',
       51: 'Легкая морось',
-      53: 'Умеренная морось', 
+      53: 'Умеренная морось',
       55: 'Сильная морось',
       61: 'Небольшой дождь',
       63: 'Умеренный дождь',
@@ -31,25 +31,29 @@ function WeatherPage() {
       const geoResponse = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=ru`
       );
-      
-      if (!geoResponse.ok) throw new Error('Город не найден');
-      
+
+      if (!geoResponse.ok) {
+        throw new Error('Город не найден');
+      }
+
       const geoData = await geoResponse.json();
       if (!geoData.results || geoData.results.length === 0) {
         throw new Error('Город не найден');
       }
-      
+
       const location = geoData.results[0];
-      
+
       const weatherResponse = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,weather_code&timezone=auto`
       );
-      
-      if (!weatherResponse.ok) throw new Error('Ошибка получения погоды');
-      
+
+      if (!weatherResponse.ok) {
+        throw new Error('Ошибка получения погоды');
+      }
+
       const weatherData = await weatherResponse.json();
       const current = weatherData.current;
-      
+
       return {
         temperature: Math.round(current.temperature_2m),
         feelsLike: Math.round(current.apparent_temperature),
@@ -61,7 +65,7 @@ function WeatherPage() {
         country: location.country_code,
         timestamp: Date.now()
       };
-      
+
     } catch (error) {
       throw error;
     }
@@ -72,11 +76,13 @@ function WeatherPage() {
       const response = await fetch(
         `https://api.weatherapi.com/v1/current.json?key=7c8c66e9f1a44c1b857145058242101&q=${encodeURIComponent(cityName)}&lang=ru`
       );
-      
-      if (!response.ok) throw new Error('API недоступно');
-      
+
+      if (!response.ok) {
+        throw new Error('API недоступно');
+      }
+
       const data = await response.json();
-      
+
       return {
         temperature: Math.round(data.current.temp_c),
         feelsLike: Math.round(data.current.feelslike_c),
@@ -93,43 +99,47 @@ function WeatherPage() {
     }
   }, []);
 
-  const fetchWeather = useCallback(async () => {
-    if (!city.trim()) return;
+  const fetchWeather = useCallback(async (cityName) => {
+    if (!cityName || !cityName.trim()) {
+      return;
+    }
 
     setLoading(true);
     setError('');
 
     try {
       let weatherData;
-      
+
       try {
-        weatherData = await fetchOpenMeteoWeather(city);
+        weatherData = await fetchOpenMeteoWeather(cityName);
       } catch (error) {
-        weatherData = await fetchWeatherAPI(city);
+        weatherData = await fetchWeatherAPI(cityName);
       }
-      
+
       setWeather(weatherData);
-      
+
     } catch (error) {
       setError('Не удалось получить данные. Проверьте название города.');
     } finally {
       setLoading(false);
     }
-  }, [city, fetchOpenMeteoWeather, fetchWeatherAPI]);
+  }, [fetchOpenMeteoWeather, fetchWeatherAPI]);
 
   useEffect(() => {
-    fetchWeather();
+    fetchWeather('Москва');
   }, [fetchWeather]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchWeather();
+    if (city.trim()) {
+      fetchWeather(city.trim());
+    }
   };
 
   return (
     <div className="weather-page">
       <h2>Погода</h2>
-      
+
       <form onSubmit={handleSubmit} className="weather-controls">
         <input
           type="text"
@@ -157,12 +167,12 @@ function WeatherPage() {
           <div className="weather-header">
             <h3>{weather.city}, {weather.country}</h3>
           </div>
-          
+
           <div className="weather-main">
             <div className="temperature">{weather.temperature}°C</div>
             <div className="description">{weather.description}</div>
           </div>
-          
+
           <div className="weather-details">
             <div className="detail">
               <span>Влажность</span>

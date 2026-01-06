@@ -1,17 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { sendTestNotification, requestNotificationPermission } from '../registerServiceWorker';
+import { ErrorIcon, WarningIcon, InfoIcon, CheckIcon, CloseIcon } from '../icons';
 
 const CACHE_NAME = 'reddpwa-cache-v5';
 
-function DebugPage() {
+function DebugPage({ showNotification }) {
   const [debugInfo, setDebugInfo] = useState({});
   const [cacheSize, setCacheSize] = useState(0);
   const [serviceWorkerStatus, setServiceWorkerStatus] = useState('unknown');
   const [notificationPermission, setNotificationPermission] = useState('default');
   const [notificationStatus, setNotificationStatus] = useState('');
+  const [errorModal, setErrorModal] = useState(null);
 
   const formatBytes = useCallback((bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -20,7 +24,7 @@ function DebugPage() {
 
   const updateDebugInfo = useCallback(async () => {
     const screenInfo = window.screen || {};
-    
+
     const info = {
       userAgent: navigator.userAgent,
       platform: navigator.platform,
@@ -56,12 +60,12 @@ function DebugPage() {
       try {
         const registration = await navigator.serviceWorker.ready;
         setServiceWorkerStatus('activated');
-        
+
         if (registration.active) {
           const cache = await caches.open(CACHE_NAME);
           const keys = await cache.keys();
           let totalSize = 0;
-          
+
           for (const request of keys) {
             const response = await cache.match(request);
             if (response) {
@@ -69,7 +73,7 @@ function DebugPage() {
               totalSize += blob.size;
             }
           }
-          
+
           setCacheSize(totalSize);
         }
       } catch (error) {
@@ -82,7 +86,7 @@ function DebugPage() {
 
   useEffect(() => {
     updateDebugInfo();
-    
+
     const interval = setInterval(updateDebugInfo, 12000);
     return () => clearInterval(interval);
   }, [updateDebugInfo]);
@@ -94,17 +98,32 @@ function DebugPage() {
   }, []);
 
   const clearCache = async () => {
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map(name => caches.delete(name)));
-      setCacheSize(0);
-      updateDebugInfo();
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        setCacheSize(0);
+        updateDebugInfo();
+        showNotification('Успех', 'Кэш успешно очищен', 'success');
+      } else {
+        setErrorModal({
+          type: 'error',
+          title: 'Ошибка',
+          message: 'Кэш не поддерживается в этом браузере'
+        });
+      }
+    } catch (error) {
+      setErrorModal({
+        type: 'error',
+        title: 'Ошибка очистки кэша',
+        message: `Не удалось очистить кэш: ${error.message}`
+      });
     }
   };
 
   const testNotification = async () => {
     setNotificationStatus('Отправка...');
-    
+
     try {
       const success = await sendTestNotification('REDDPWA Тест', {
         body: 'push-уведомление',
@@ -127,12 +146,19 @@ function DebugPage() {
 
       if (success) {
         setNotificationStatus('Уведомление отправлено');
+        showNotification('Успех', 'Тестовое уведомление отправлено', 'success');
       } else {
         setNotificationStatus('Не удалось отправить уведомление');
+        showNotification('Ошибка', 'Не удалось отправить уведомление', 'error');
       }
     } catch (error) {
       console.error('Ошибка теста уведомлений:', error);
       setNotificationStatus('Ошибка: ' + error.message);
+      setErrorModal({
+        type: 'error',
+        title: 'Ошибка уведомления',
+        message: `Не удалось отправить тестовое уведомление: ${error.message}`
+      });
     }
 
     setTimeout(() => setNotificationStatus(''), 3000);
@@ -140,46 +166,61 @@ function DebugPage() {
 
   const requestPermission = async () => {
     setNotificationStatus('Запрос разрешения...');
-    
+
     const granted = await requestNotificationPermission();
     setNotificationPermission(Notification.permission);
-    
+
     if (granted) {
       setNotificationStatus('Разрешение получено');
+      showNotification('Успех', 'Разрешение на уведомления получено', 'success');
     } else {
       setNotificationStatus('Разрешение отклонено');
+      showNotification('Предупреждение', 'Разрешение на уведомления отклонено', 'warning');
     }
-    
+
     setTimeout(() => setNotificationStatus(''), 3000);
   };
 
   const getServiceWorkerStatusText = () => {
     switch (serviceWorkerStatus) {
-      case 'activated': return 'Активен';
-      case 'error': return 'Ошибка';
-      case 'not_supported': return 'Не поддерживается';
-      default: return 'Загрузка...';
+    case 'activated': return 'Активен';
+    case 'error': return 'Ошибка';
+    case 'not_supported': return 'Не поддерживается';
+    default: return 'Загрузка...';
     }
   };
 
   const getNotificationStatusText = () => {
     switch (notificationPermission) {
-      case 'granted': return 'Разрешено';
-      case 'denied': return 'Заблокировано';
-      case 'default': return 'Не запрошено';
-      default: return 'Неизвестно';
+    case 'granted': return 'Разрешено';
+    case 'denied': return 'Заблокировано';
+    case 'default': return 'Не запрошено';
+    default: return 'Неизвестно';
+    }
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal(null);
+  };
+
+  const getModalIcon = (type) => {
+    switch (type) {
+    case 'error': return <ErrorIcon />;
+    case 'warning': return <WarningIcon />;
+    case 'success': return <CheckIcon />;
+    default: return <InfoIcon />;
     }
   };
 
   return (
     <div className="debug-page">
       <h2>PWA Debug Панель</h2>
-      
+
       <div className="debug-controls">
         <button onClick={clearCache} className="btn btn-warning">
           Очистить кэш
         </button>
-        
+
         {notificationPermission !== 'granted' ? (
           <button onClick={requestPermission} className="btn btn-primary">
             Запросить разрешение
@@ -189,7 +230,7 @@ function DebugPage() {
             Тест уведомления
           </button>
         )}
-        
+
         <button onClick={updateDebugInfo} className="btn btn-secondary">
           Обновить
         </button>
@@ -197,8 +238,8 @@ function DebugPage() {
 
       {notificationStatus && (
         <div className={`notification-status ${
-          notificationStatus.includes('отправлено') || notificationStatus.includes('получено') ? 'success' : 
-          notificationStatus.includes('Ошибка') || notificationStatus.includes('отклонено') ? 'error' : 'info'
+          notificationStatus.includes('отправлено') || notificationStatus.includes('получено') ? 'success' :
+            notificationStatus.includes('Ошибка') || notificationStatus.includes('отклонено') ? 'error' : 'info'
         }`}>
           {notificationStatus}
         </div>
@@ -294,6 +335,30 @@ function DebugPage() {
           {JSON.stringify(debugInfo, null, 2)}
         </pre>
       </div>
+
+      {errorModal && (
+        <div className="modal-overlay" onClick={closeErrorModal}>
+          <div className={`modal error-modal ${errorModal.type}`} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">
+                {getModalIcon(errorModal.type)}
+                <h3>{errorModal.title}</h3>
+              </div>
+              <button className="modal-close" onClick={closeErrorModal}>
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>{errorModal.message}</p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={closeErrorModal}>
+                Понятно
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

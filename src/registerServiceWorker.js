@@ -2,10 +2,14 @@ export const registerServiceWorker = () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
+        // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.log('Service Worker успешно зарегистрирован: ', registration);
         return registration;
       })
       .catch((registrationError) => {
+        // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.log('Ошибка регистрации Service Worker: ', registrationError);
       });
   }
@@ -13,27 +17,37 @@ export const registerServiceWorker = () => {
 
 export const requestNotificationPermission = async () => {
   if (!('Notification' in window)) {
+    // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.log('Браузер не поддерживает уведомления');
     return false;
   }
 
   if (Notification.permission === 'granted') {
+    // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.log('Разрешение на уведомления уже получено');
     return true;
   }
 
   if (Notification.permission === 'denied') {
+    // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.log('Разрешение на уведомления отклонено');
     return false;
   }
 
   try {
     const permission = await Notification.requestPermission();
-    
+
     if (permission === 'granted') {
+      // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.log('Разрешение на уведомления получено');
       return true;
     } else {
+      // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.log('Разрешение на уведомления отклонено');
       return false;
     }
@@ -44,66 +58,75 @@ export const requestNotificationPermission = async () => {
 };
 
 export const sendTestNotification = async (title = 'Тестовое уведомление', options = {}) => {
-  if (!('serviceWorker' in navigator)) {
-    console.log('Service Worker не поддерживается');
-    return false;
-  }
-
   if (Notification.permission !== 'granted') {
     const granted = await requestNotificationPermission();
     if (!granted) {
+      // eslint-disable-next-line no-console
       console.log('Нет разрешения на уведомления');
       return false;
     }
   }
 
   try {
-    const registration = await navigator.serviceWorker.ready;
-    
-    const notificationOptions = {
-      body: options.body || 'Это тестовое push-уведомление от вашего PWA!',
-      icon: options.icon || '/logo192.png',
-      badge: options.badge || '/logo192.png',
-      image: options.image,
-      tag: options.tag || 'test-notification',
-      requireInteraction: options.requireInteraction || true,
-      actions: options.actions || [
-        {
-          action: 'open',
-          title: 'Открыть приложение'
-        },
-        {
-          action: 'close', 
-          title: 'Закрыть'
-        }
-      ],
-      data: options.data || {
-        url: window.location.origin,
-        timestamp: Date.now()
-      },
-      ...options
-    };
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
 
-    await registration.showNotification(title, notificationOptions);
-    console.log('Push-уведомление отправлено');
-    return true;
-  } catch (error) {
-    console.error('Ошибка отправки уведомления:', error);
-    
+        const notificationOptions = {
+          body: options.body || 'Это тестовое push-уведомление от вашего PWA!',
+          icon: options.icon || '/logo192.png',
+          badge: options.badge || '/logo192.png',
+          image: options.image,
+          tag: options.tag || 'test-notification',
+          requireInteraction: options.requireInteraction !== undefined ? options.requireInteraction : true,
+          actions: options.actions || [],
+          data: options.data || {
+            url: window.location.origin,
+            timestamp: Date.now()
+          },
+          ...options
+        };
+
+        await registration.showNotification(title, notificationOptions);
+        // eslint-disable-next-line no-console
+        console.log('Push-уведомление отправлено через Service Worker');
+        return true;
+      } catch (swError) {
+        // eslint-disable-next-line no-console
+        console.log('Ошибка через Service Worker, используем обычный API:', swError);
+      }
+    }
+
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, {
-        body: options.body || 'Это тестовое уведомление',
-        icon: options.icon || '/logo192.png'
+      const notification = new Notification(title, {
+        body: options.body || 'Это тестовое уведомление от вашего PWA!',
+        icon: options.icon || '/logo192.png',
+        badge: options.badge || '/logo192.png',
+        tag: options.tag || 'test-notification',
+        requireInteraction: options.requireInteraction !== undefined ? options.requireInteraction : true,
+        ...options
       });
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
+      // eslint-disable-next-line no-console
+      console.log('Уведомление отправлено через Notification API');
       return true;
     }
-    
+
+    return false;
+  } catch (error) {
+    console.error('Ошибка отправки уведомления:', error);
     return false;
   }
 };
 
 export const subscribeToPush = async () => {
   if (!('serviceWorker' in navigator)) {
+    // eslint-disable-next-line no-console
     console.log('Service Worker не поддерживается');
     return null;
   }
@@ -115,7 +138,8 @@ export const subscribeToPush = async () => {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
     });
-    
+
+    // eslint-disable-next-line no-console
     console.log('Подписка на push получена:', subscription);
     return subscription;
   } catch (error) {
