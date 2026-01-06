@@ -1,6 +1,6 @@
-# Progressive Multitool PWA
+# Multitool PWA
 
-Progressive Web App с оффлайн функциональностью.
+Multitool PWA — это современное веб-приложение, которое объединяет сразу несколько полезных для dev инструментов.
 
 ![Скриншот](https://i.postimg.cc/tJKP3PbF/Snimok-ekrana-2026-01-06-v-17-04-52.png)
 ![Скриншот](https://i.postimg.cc/wBWkt0WJ/Snimok-ekrana-2026-01-06-v-17-31-32.png)
@@ -8,18 +8,24 @@ Progressive Web App с оффлайн функциональностью.
 ## Live Demo
 [Посмотреть Демо](https://pwa-weld.vercel.app/)
 
-## Возможности
-- **Оффлайн работа** - кэширование данных и ресурсов
-- **Push-уведомления**
-- **Установка на устройство** - как нативное приложение
-- **Адаптивный дизайн** - работа на всех устройствах
-- **Быстрая загрузка** - оптимизированная производительность
+## Основные функции:
+- Погода - прогнозы для любого города
+- Файловый менеджер - загрузка и хранение файлов
+- Debug панель - мониторинг PWA и тестирование
 
-## Технологии
-- **Frontend**: Next.js, React, TypeScript, 
-- **PWA**: Service Worker, Web App Manifest
-- **API**: OpenWeather API
-- **Деплой**: Vercel
+## PWA возможности:
+- Установка как нативное приложение
+- Полный оффлайн режим
+- Push-уведомления
+- Адаптивный дизайн
+- Быстрая загрузка
+
+## Ключевые технологии:
+- **Frontend:** React 19.2.0 + JavaScript ES6+
+- **PWA:** Service Worker, Web App Manifest, Workbox
+- **APIs:** Open-Meteo, WeatherAPI, File API, Notification API
+- **CI/CD:** GitHub Actions, ESLint, Prettier, Jest
+- **Деплой:** Vercel
 
 ## Установка и Запуск
 
