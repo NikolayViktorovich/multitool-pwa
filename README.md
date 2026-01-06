@@ -1,8 +1,9 @@
-# Progressive PWA
+# Progressive Multitool PWA
 
 Progressive Web App с оффлайн функциональностью.
 
-![Скриншот](https://i.postimg.cc/h4TnFDKP/reddpwa.png)
+![Скриншот](https://i.postimg.cc/tJKP3PbF/Snimok-ekrana-2026-01-06-v-17-04-52.png)
+![Скриншот](https://i.postimg.cc/KYWPN4tq/Snimok-ekrana-2026-01-06-v-17-07-46.png)
 
 ## Live Demo
 [Посмотреть Демо](https://pwa-weld.vercel.app/)
